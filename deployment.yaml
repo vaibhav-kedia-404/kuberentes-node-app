@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: node-app
-          image: node-k8s-app:v2
+          image: node-k8s-app:v3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000

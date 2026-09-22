@@ -16,6 +16,12 @@ jobs:
       - name: Check Kubernetes cluster
         run: kubectl get nodes
 
+      - name: Build Docker image
+        run: docker build -t node-k8s-app:v3 .
+
+      - name: Load image into Minikube
+        run: minikube image load node-k8s-app:v3
+
       - name: Apply Kubernetes Deployment
         run: kubectl apply -f deployment.yaml
 
