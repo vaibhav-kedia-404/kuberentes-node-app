@@ -1,4 +1,5 @@
-name: Kubernetes Continuous Deployment
+
+name: Deploy Node.js App to Kubernetes
 
 on:
   push:
@@ -7,32 +8,35 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check Kubernetes cluster
-        run: kubectl get nodes
+      - name: Set up Minikube
+        uses: medyagh/setup-minikube@latest
 
-      - name: Build Docker image
-        run: docker build -t node-k8s-app:v3 .
-
-      - name: Load image into Minikube
-        run: minikube image load node-k8s-app:v3
-
-      - name: Apply Kubernetes Deployment
-        run: kubectl apply -f deployment.yaml
-
-      - name: Apply Kubernetes Service
-        run: kubectl apply -f service.yaml
-
-      - name: Check deployment status
-        run: kubectl rollout status deployment/node-app
-
-      - name: Display Kubernetes resources
+      - name: Load existing Docker image
         run: |
-          kubectl get deployment
+          docker images
+          minikube image load node-k8s-app:v3
+
+      - name: Deploy application to Kubernetes
+        run: |
+          kubectl apply -f deployment.yaml
+          kubectl apply -f service.yaml
+
+      - name: Wait for deployment
+        run: |
+          kubectl rollout status deployment/node-app --timeout=120s
+
+      - name: Verify deployment
+        run: |
+          kubectl get deployments
           kubectl get pods
-          kubectl get service
+          kubectl get services
+
+      - name: Verify application version
+        run: |
+          kubectl describe deployment node-app | grep "Image:"
