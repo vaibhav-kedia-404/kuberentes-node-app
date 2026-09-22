@@ -1,10 +1,11 @@
+
 const express = require("express");
 
 const app = express();
 const PORT = 3000;
 
 app.get("/", (req, res) => {
-    res.send("Hello from Kubernetes Node.js Application - Version 2");
+    res.send("Hello from Kubernetes Node.js Application - Version 3");
 });
 
 app.listen(PORT, () => {
