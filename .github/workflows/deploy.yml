@@ -1,4 +1,3 @@
-
 name: Deploy Node.js App to Kubernetes
 
 on:
@@ -8,24 +7,37 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Minikube
-        uses: medyagh/setup-minikube@latest
-
-      - name: Load existing Docker image
+      - name: Verify Docker
         run: |
+          docker --version
           docker images
+
+      - name: Verify V3 image
+        run: |
+          docker image inspect node-k8s-app:v3
+
+      - name: Load V3 image into Minikube
+        run: |
           minikube image load node-k8s-app:v3
 
-      - name: Deploy application to Kubernetes
+      - name: Verify image in Minikube
+        run: |
+          minikube image ls | grep node-k8s-app
+
+      - name: Deploy application
         run: |
           kubectl apply -f deployment.yaml
           kubectl apply -f service.yaml
+
+      - name: Restart deployment
+        run: |
+          kubectl rollout restart deployment/node-app
 
       - name: Wait for deployment
         run: |
@@ -37,6 +49,7 @@ jobs:
           kubectl get pods
           kubectl get services
 
-      - name: Verify application version
+      - name: Verify V3 image
         run: |
           kubectl describe deployment node-app | grep "Image:"
+
